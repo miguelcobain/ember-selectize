@@ -11,6 +11,16 @@ Should run wherever Ember and Selectize run.
 Just grab the `src/ember.selectize.js` and drop/include in your build pipeline.
 Building automation is not available since this is a very simple project (basically an `Ember.View`).
 
+The usage should be very similar to `Ember.Select`. For example, in a template you could write:
+
+```handlebars
+{{ view Ember.Selectize id="type"
+  contentBinding="controller.types"
+  optionValuePath="content.id"
+  optionLabelPath="content.name"
+  selectionBinding="model.type"
+  placeholder="Select an option" }}
+```
 ## Tests
 
 Open `tests/index.html` in a browser.
