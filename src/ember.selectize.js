@@ -31,7 +31,6 @@ Ember.Selectize = Ember.View.extend({
       onType : $.proxy(this._onType, this)
     });
     this.selectize = this.$()[0].selectize;
-    debugger;
     this._contentDidChange();
     this._selectionDidChange();
   },
