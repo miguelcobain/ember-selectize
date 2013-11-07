@@ -1,31 +1,27 @@
 var map = Ember.EnumerableUtils.map,
     trim = Ember.$.trim;
 
-var dispatcher, select, view;
+var dispatcher, selectizeView;
 
 module("Ember.Selectize", {
   setup: function() {
     dispatcher = Ember.EventDispatcher.create();
     dispatcher.setup();
-    select = Ember.Selectize.create();
+    selectizeView = Ember.Selectize.create();
   },
 
   teardown: function() {
     Ember.run(function() {
       dispatcher.destroy();
-      select.destroy();
+      selectizeView.destroy();
     });
   }
 });
 
 function append() {
   Ember.run(function() {
-    select.appendTo('#qunit-fixture');
+    selectizeView.appendTo('#qunit-fixture');
   });
-}
-
-function selectedOptions() {
-  return select.get('childViews').mapBy('selected');
 }
 
 function countProperties(object){
@@ -41,78 +37,97 @@ function countProperties(object){
   return count;
 }
 
+function asArray(object){
+  var i, arr =[];
+  for (i in object) {
+      if (object.hasOwnProperty(i)) {
+          arr.push(object[i]);
+      }
+  }
+  
+  return arr;
+}
+
 test("has 'ember-view' and 'ember-selectize' CSS classes", function() {
-  deepEqual(select.get('classNames'), ['ember-view', 'ember-selectize']);
+  deepEqual(selectizeView.get('classNames'), ['ember-view', 'ember-selectize']);
 });
 
 test("should render", function() {
   append();
 
-  ok(select.$().length, "Select renders");
+  ok(selectizeView.$().length, "Selectize renders");
 });
 
 test("should begin disabled if the disabled attribute is true", function() {
-  select.set('disabled', true);
+  selectizeView.set('disabled', true);
   append();
-  ok(select.disabled);
+  ok(selectizeView.selectize.isDisabled);
 });
 
 test("should become disabled if the disabled attribute is changed", function() {
   append();
-  ok(!select.disabled);
+  ok(!selectizeView.selectize.isDisabled);
 
-  Ember.run(function() { select.set('disabled', true); });
-  ok(select.disabled);
+  Ember.run(function() { selectizeView.set('disabled', true); });
+  ok(selectizeView.selectize.isDisabled);
 
-  Ember.run(function() { select.set('disabled', false); });
-  ok(!select.disabled);
+  Ember.run(function() { selectizeView.set('disabled', false); });
+  ok(!selectizeView.selectize.isDisabled);
 });
 
 test("can have options", function() {
-  select.set('content', Ember.A([1, 2, 3]));
+  selectizeView.set('content', Ember.A([1, 2, 3]));
 
   append();
 
-  equal(select.$('option').length, 3, "Should have three options");
+  equal(asArray(selectizeView.selectize.options).length, 3, "Should have three options");
   // IE 8 adds whitespace
-  equal(select.$().text().replace(/\s+/g,''), "123", "Options should have content");
+  deepEqual(map(selectizeView.get('content'), function(o) {
+    return selectizeView.selectize.options[o][selectizeView.selectize.settings.labelField];
+  }), [1, 2, 3], "Options should have content");
+  
+  deepEqual(map(selectizeView.get('content'), function(o) {
+    return selectizeView.selectize.options[o][selectizeView.selectize.settings.valueField];
+  }), [1, 2, 3], "Options should have values");
 });
 
 test("can specify the property path for an option's label and value", function() {
-  select.set('content', Ember.A([
+  selectizeView.set('content', Ember.A([
     { id: 1, firstName: 'Yehuda' },
     { id: 2, firstName: 'Tom' }
   ]));
 
-  select.set('optionLabelPath', 'content.firstName');
-  select.set('optionValuePath', 'content.id');
+  selectizeView.set('optionLabelPath', 'content.firstName');
+  selectizeView.set('optionValuePath', 'content.id');
 
   append();
-
-  equal(countProperties(select.selectize.options), 2, "Should have two options");
   
-  deepEqual(map(select.get('content'),function(o){
-    return select.selectize.getOption(o.id).text();
+  equal(asArray(selectizeView.selectize.options).length, 2, "Should have two options");
+  
+  deepEqual(map(selectizeView.get('content'),function(o){
+    return selectizeView.selectize.options[o.id][selectizeView.selectize.settings.labelField];
   }), ["Yehuda","Tom"], "Options should have content");
   
-  deepEqual(map(select.get('content'), function(o) {
-    return select.selectize.getOption(o.id).attr('data-value');
-  }), ["1", "2"], "Options should have values");
+  deepEqual(map(selectizeView.get('content'), function(o) {
+    return selectizeView.selectize.options[o.id][selectizeView.selectize.settings.valueField];
+  }), [1, 2], "Options should have values");
 });
 
 test("can retrieve the current selected option when multiple=false", function() {
   var yehuda = { id: 1, firstName: 'Yehuda' },
       tom = { id: 2, firstName: 'Tom' };
-  select.set('content', Ember.A([yehuda, tom]));
-
+  selectizeView.set('content', Ember.A([yehuda, tom]));
+  
+  selectizeView.set('optionLabelPath', 'content.firstName');
+  selectizeView.set('optionValuePath', 'content.id');
+  
   append();
+  
+  equal(selectizeView.get('selection'), null, "By default, nothing is selected");
 
-  equal(select.get('selection'), yehuda, "By default, the first option is selected");
+  selectizeView.selectize.addItem(2); // select Tom
 
-  select.$()[0].selectedIndex = 1; // select Tom
-  select.$().trigger('change');
-
-  equal(select.get('selection'), tom, "On change, the new option should be selected");
+  equal(selectizeView.get('selection'), tom, "On change, the new option should be selected");
 });
 
 test("can retrieve the current selected options when multiple=true", function() {
@@ -120,24 +135,20 @@ test("can retrieve the current selected options when multiple=true", function() 
       tom = { id: 2, firstName: 'Tom' },
       david = { id: 3, firstName: 'David' },
       brennain = { id: 4, firstName: 'Brennain' };
-  select.set('content', Ember.A([yehuda, tom, david, brennain]));
-  select.set('multiple', true);
-  select.set('optionLabelPath', 'content.firstName');
-  select.set('optionValuePath', 'content.firstName');
+
+  selectizeView.set('content', Ember.A([yehuda, tom, david, brennain]));
+  selectizeView.set('multiple', true);
+  selectizeView.set('optionLabelPath', 'content.firstName');
+  selectizeView.set('optionValuePath', 'content.id');
 
   append();
 
-  deepEqual(select.get('selection'), [], "By default, nothing is selected");
+  deepEqual(selectizeView.get('selection'), [], "By default, nothing is selected");
 
-  select.$('option').each(function() {
-    if (this.value === 'Tom' || this.value === 'David') {
-      this.selected = true;
-    }
-  });
+  selectizeView.selectize.addItem(2); // select Tom
+  selectizeView.selectize.addItem(3); // select David
 
-  select.$().trigger('change');
-
-  deepEqual(select.get('selection'), [tom, david], "On change, the new options should be selected");
+  deepEqual(selectizeView.get('selection'), [tom, david], "On change, the new options should be selected");
 });
 
 test("selection can be set when multiple=false", function() {
@@ -145,18 +156,21 @@ test("selection can be set when multiple=false", function() {
       tom = { id: 2, firstName: 'Tom' };
 
   Ember.run(function() {
-    select.set('content', Ember.A([yehuda, tom]));
-    select.set('multiple', false);
-    select.set('selection', tom);
+    selectizeView.set('optionLabelPath', 'content.firstName');
+    selectizeView.set('optionValuePath', 'content.id');
+  
+    selectizeView.set('content', Ember.A([yehuda, tom]));
+    selectizeView.set('multiple', false);
+    selectizeView.set('selection', tom);
   });
 
   append();
+  
+  deepEqual(selectizeView.selectize.items, [tom.id+""], "Initial selection should be correct");
 
-  equal(select.get('selection'), tom, "Initial selection should be correct");
-
-  Ember.run(function() { select.set('selection', yehuda); });
-
-  equal(select.$()[0].selectedIndex, 0, "After changing it, selection should be correct");
+  Ember.run(function() { selectizeView.set('selection', yehuda); });
+  
+  deepEqual(selectizeView.selectize.items, [yehuda.id+""], "After changing it, selection should be correct");
 });
 
 test("selection can be set when multiple=true", function() {
@@ -166,18 +180,21 @@ test("selection can be set when multiple=true", function() {
       brennain = { id: 4, firstName: 'Brennain' };
 
   Ember.run(function() {
-    select.set('content', Ember.A([yehuda, tom, david, brennain]));
-    select.set('multiple', true);
-    select.set('selection', tom);
+    selectizeView.set('optionLabelPath', 'content.firstName');
+    selectizeView.set('optionValuePath', 'content.id');
+    
+    selectizeView.set('content', Ember.A([yehuda, tom, david, brennain]));
+    selectizeView.set('multiple', true);
+    selectizeView.set('selection', tom);
   });
-debugger;
+
   append();
 
-  deepEqual(select.get('selection'), [tom], "Initial selection should be correct");
+  deepEqual(selectizeView.selectize.items, [tom.id+""], "Initial selection should be correct");
 
-  Ember.run(function() { select.set('selection', yehuda); });
-
-  deepEqual(select.get('selection'), [yehuda], "After changing it, selection should be correct");
+  Ember.run(function() { selectizeView.set('selection', yehuda); });
+  
+  deepEqual(selectizeView.selectize.items, [yehuda.id+""], "After changing it, selection should be correct");
 });
 
 test("multiple selections can be set when multiple=true", function() {
@@ -187,23 +204,23 @@ test("multiple selections can be set when multiple=true", function() {
       brennain = { id: 4, firstName: 'Brennain' };
 
   Ember.run(function() {
-    select.set('content', Ember.A([yehuda, tom, david, brennain]));
-    select.set('optionLabelPath', 'content.firstName');
-    select.set('multiple', true);
+    selectizeView.set('optionLabelPath', 'content.firstName');
+    selectizeView.set('optionValuePath', 'content.id');
+    
+    selectizeView.set('content', Ember.A([yehuda, tom, david, brennain]));
+    selectizeView.set('multiple', true);
 
-    select.set('selection', Ember.A([yehuda, david]));
+    selectizeView.set('selection', Ember.A([yehuda, david]));
   });
 
   append();
+  
+  deepEqual(selectizeView.selectize.items, [yehuda.id+"",david.id+""], "Initial selection should be correct");
 
-  deepEqual(select.get('selection'), [yehuda, david], "Initial selection should be correct");
+  Ember.run(function() { selectizeView.set('selection', Ember.A([tom, brennain])); });
 
-  Ember.run(function() { select.set('selection', Ember.A([tom, brennain])); });
+  deepEqual(selectizeView.selectize.items, [tom.id+"",brennain.id+""], "After changing it, selection should be correct");
 
-  deepEqual(
-    select.$(':selected').map(function() { return trim(Ember.$(this).text());}).toArray(),
-    ['Tom', 'Brennain'],
-    "After changing it, selection should be correct");
 });
 
 test("multiple selections can be set by changing in place the selection array when multiple=true", function() {
@@ -214,24 +231,23 @@ test("multiple selections can be set by changing in place the selection array wh
       selection = Ember.A([yehuda, tom]);
 
   Ember.run(function() {
-    select.set('content', Ember.A([yehuda, tom, david, brennain]));
-    select.set('optionLabelPath', 'content.firstName');
-    select.set('multiple', true);
-    select.set('selection', selection);
+    selectizeView.set('optionLabelPath', 'content.firstName');
+    selectizeView.set('optionValuePath', 'content.id');
+    
+    selectizeView.set('content', Ember.A([yehuda, tom, david, brennain]));
+    selectizeView.set('multiple', true);
+    selectizeView.set('selection', selection);
   });
 
   append();
 
-  deepEqual(select.get('selection'), [yehuda, tom], "Initial selection should be correct");
+  deepEqual(selectizeView.selectize.items, [yehuda.id+"",tom.id+""], "Initial selection should be correct");
 
   Ember.run(function() {
     selection.replace(0, selection.get('length'), Ember.A([david, brennain]));
   });
 
-  deepEqual(
-    select.$(':selected').map(function() { return trim(Ember.$(this).text());}).toArray(),
-    ['David', 'Brennain'],
-    "After updating the selection array in-place, selection should be correct");
+  deepEqual(selectizeView.selectize.items, [david.id+"",brennain.id+""], "After updating the selection array in-place, selection should be correct");
 });
 
 
@@ -245,15 +261,16 @@ test("multiple selections can be set indirectly via bindings and in-place when m
       cyril = { id: 5, firstName: 'Cyril' };
 
   Ember.run(function() {
-    select.destroy(); // Destroy the existing select
+    selectizeView.destroy(); // Destroy the existing select
 
     Ember.run(function() {
-      select = Ember.Select.extend({
+      selectizeView = Ember.Selectize.extend({
         indirectContent: indirectContent,
         contentBinding: 'indirectContent.controller.content',
         selectionBinding: 'indirectContent.controller.selection',
         multiple: true,
-        optionLabelPath: 'content.firstName'
+        optionLabelPath: 'content.firstName',
+        optionValuePath: 'content.id'
       }).create();
 
       indirectContent.set('controller', Ember.Object.create({
@@ -265,18 +282,19 @@ test("multiple selections can be set indirectly via bindings and in-place when m
     append();
   });
 
-  deepEqual(select.get('content'), [tom, david, brennain], "Initial content should be correct");
-  deepEqual(select.get('selection'), [david], "Initial selection should be correct");
+  deepEqual(selectizeView.get('content'), [tom, david, brennain], "Initial content should be correct");
+  deepEqual(selectizeView.get('selection'), [david], "Initial selection should be correct");
 
   Ember.run(function() {
     indirectContent.set('controller.content', Ember.A([david, cyril]));
     indirectContent.set('controller.selection', Ember.A([cyril]));
   });
 
-  deepEqual(select.get('content'), [david, cyril], "After updating bound content, content should be correct");
-  deepEqual(select.get('selection'), [cyril], "After updating bound selection, selection should be correct");
+  deepEqual(selectizeView.get('content'), [david, cyril], "After updating bound content, content should be correct");
+  deepEqual(selectizeView.get('selection'), [cyril], "After updating bound selection, selection should be correct");
 });
 
+/*
 test("select with group can group options", function() {
   var content = Ember.A([
     { firstName: 'Yehuda', organization: 'Tilde' },
@@ -375,7 +393,8 @@ test("select with group whose content is undefined doesn't breaks", function() {
   append();
 
   equal(select.$('optgroup').length, 0);
-});
+});*/
+
 test("selection uses the same array when multiple=true", function() {
   var yehuda = { id: 1, firstName: 'Yehuda' },
       tom = { id: 2, firstName: 'Tom' },
@@ -384,25 +403,29 @@ test("selection uses the same array when multiple=true", function() {
       selection = Ember.A([yehuda, david]);
 
   Ember.run(function() {
-    select.set('content', Ember.A([yehuda, tom, david, brennain]));
-    select.set('multiple', true);
-    select.set('optionLabelPath', 'content.firstName');
-    select.set('selection', selection);
+    selectizeView.set('optionLabelPath', 'content.firstName');
+    selectizeView.set('optionValuePath', 'content.id');
+    
+    selectizeView.set('content', Ember.A([yehuda, tom, david, brennain]));
+    selectizeView.set('multiple', true);
+    selectizeView.set('selection', selection);
   });
 
   append();
 
-  deepEqual(select.get('selection'), [yehuda, david], "Initial selection should be correct");
+  deepEqual(selectizeView.get('selection'), [yehuda, david], "Initial selection should be correct");
 
-  select.$('option').each(function() { this.selected = false; });
-  select.$(':contains("Tom"), :contains("David")').each(function() { this.selected = true; });
+  //Clear
+  selectizeView.selectize.removeItem(selectizeView.selectize.items[0]);
+  selectizeView.selectize.removeItem(selectizeView.selectize.items[0]);
+  selectizeView.selectize.addItem(2); //select Tom
+  selectizeView.selectize.addItem(3); //select David
 
-  select.$().trigger('change');
-
-  deepEqual(select.get('selection'), [tom,david], "On change the selection is updated");
+  deepEqual(selectizeView.get('selection'), [tom,david], "On change the selection is updated");
   deepEqual(selection, [tom,david], "On change the original selection array is updated");
 });
 
+/*
 test("Ember.SelectedOption knows when it is selected when multiple=false", function() {
   var yehuda = { id: 1, firstName: 'Yehuda' },
       tom = { id: 2, firstName: 'Tom' },
@@ -463,17 +486,18 @@ test("Ember.SelectedOption knows when it is selected when multiple=true and opti
   Ember.run(function() { select.set('selection', [2, 3]); });
 
   deepEqual(selectedOptions(), [false, true, true, false], "After changing it, selection should be correct");
-});
+});*/
 
-test("a prompt can be specified", function() {
+/*test("a prompt can be specified", function() {
   var yehuda = { id: 1, firstName: 'Yehuda' },
       tom = { id: 2, firstName: 'Tom' };
-
+  
   Ember.run(function() {
-    select.set('content', Ember.A([yehuda, tom]));
-    select.set('prompt', 'Pick a person');
-    select.set('optionLabelPath', 'content.firstName');
-    select.set('optionValuePath', 'content.id');
+  
+    selectizeView.set('optionValuePath', 'content.id');
+    selectizeView.set('content', Ember.A([yehuda, tom]));
+    selectizeView.set('prompt', 'Pick a person');
+    selectizeView.set('optionLabelPath', 'content.firstName');
   });
 
   append();
@@ -497,25 +521,25 @@ test("a prompt can be specified", function() {
   select.$()[0].selectedIndex = 2;
   select.$().trigger('change');
   equal(select.get('selection'), tom, "Properly accounts for the prompt when DOM change occurs");
-});
+});*/
 
 test("handles null content", function() {
   append();
 
   Ember.run(function() {
-    select.set('content', null);
-    select.set('selection', 'invalid');
-    select.set('value', 'also_invalid');
+    selectizeView.set('content', null);
+    selectizeView.set('selection', 'invalid');
+    selectizeView.set('value', 'also_invalid');
   });
-
-  equal(select.get('element').selectedIndex, -1, "should have no selection");
+  
+  equal(selectizeView.get('selection'), null, "should have no selection");
 
   Ember.run(function() {
-    select.set('multiple', true);
-    select.set('selection', [{ content: 'invalid' }]);
+    selectizeView.set('multiple', true);
+    selectizeView.set('selection', [{ content: 'invalid' }]);
   });
 
-  equal(select.get('element').selectedIndex, -1, "should have no selection");
+  equal(selectizeView.get('element').selectedIndex, -1, "should have no selection");
 });
 
 test("valueBinding handles 0 as initiated value (issue #2763)", function() {
