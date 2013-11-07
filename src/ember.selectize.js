@@ -134,7 +134,7 @@ Ember.Selectize = Ember.View.extend({
     if(this.selectize) this.selectize.addItem(get(obj,get(this,'_valuePath')));
   },
   selectionObjectWasRemoved : function(obj) {
-    if(this.selectize) this.selectize.removeOption(get(obj,get(this,'_valuePath')));
+    if(this.selectize) this.selectize.removeItem(get(obj,get(this,'_valuePath')));
   },
   _contentDidChange : Ember.observer(function() {
     var inDOM = get(this, 'inDOM');
