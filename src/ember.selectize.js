@@ -43,7 +43,7 @@ Ember.Selectize = Ember.View.extend({
         didChange : 'contentArrayDidChange'
       });
       content.forEach(function(item){
-        if(typeOf(item) === 'object' || typeOf(obj) === 'instance')
+        if(typeOf(item) === 'object' || typeOf(item) === 'instance')
           Ember.removeObserver(item,get(this,'_labelPath'),this,'_labelDidChange');
       },this);
     }
