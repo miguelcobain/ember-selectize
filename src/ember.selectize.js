@@ -1,24 +1,50 @@
 var get = Ember.get, set = Ember.set, isArray = Ember.isArray, typeOf = Ember.typeOf;
 
+/**
+ * Ember.Selectize is an Ember View that encapsulates a Selectize component.
+ * The goal is to use this as a near dropin replacement for Ember.Select.
+ */
 Ember.Selectize = Ember.View.extend({
   attributeBindings : ['multiple', 'placeholder','autocomplete'],
+  classNames : ['ember-selectize'],
+  
   autocomplete:'off',
   tagName : 'select',
-  classNames : ['ember-selectize'],
+  
+  /**
+   * default object paths for value and label paths
+   */
   optionValuePath : 'content.value',
   optionLabelPath : 'content.label',
+  
+  /**
+   * The array of the default plugins to load into selectize
+   */
   plugins: ['remove_button'],
   
+  /**
+   * Computed properties that hold the processed paths ('content.' replacement),
+   * as it is done on Ember.Select
+   */
   _valuePath : Ember.computed('optionValuePath',function(){
     return get(this,'optionValuePath').replace(/^content\.?/, '');
   }),
-  optionLabelPath : 'content.label',
   _labelPath : Ember.computed('optionLabelPath',function(){
     return get(this,'optionLabelPath').replace(/^content\.?/, '');
   }),
   
+  /**
+   * This flag should be true when the element is present in the DOM and false when if isn't.
+   * This helps to avoid triggering unecessary observers.
+   */
+  inDOM: false,
+  
   didInsertElement : function() {
-    set(this,'inDOM',true);
+    //View is now in DOM
+    this.inDOM = true;
+    
+    //Create Selectize's instance
+    //We proxy callbacks through jQuery's 'proxy' to have the callbacks context set to 'this'
     this.$().selectize({
       plugins: this.plugins,
       labelField : 'label',
@@ -28,7 +54,12 @@ Ember.Selectize = Ember.View.extend({
       onItemRemove : $.proxy(this._onItemRemove, this),
       onType : $.proxy(this._onType, this)
     });
+    
+    //Save the created selectize instance
     this.selectize = this.$()[0].selectize;
+    
+    //Some changes to content, selection and disabled could have happened before the View was inserted into the DOM.
+    //We trigger all the observers manually to account for those changes.
     this._disabledDidChange();
     this._contentDidChange();
     this._selectionDidChange();
@@ -38,10 +69,12 @@ Ember.Selectize = Ember.View.extend({
     var multiple = get(this, 'multiple');
     
     if (content) {
+      //Remove observers from content array
       content.removeArrayObserver(this, {
         willChange : 'contentArrayWillChange',
         didChange : 'contentArrayDidChange'
       });
+      //Remove observers from each element's label property
       content.forEach(function(item){
         if(typeOf(item) === 'object' || typeOf(item) === 'instance')
           Ember.removeObserver(item,get(this,'_labelPath'),this,'_labelDidChange');
@@ -50,17 +83,30 @@ Ember.Selectize = Ember.View.extend({
     if(multiple){
       var selection = get(this, 'selection');
       if(selection) {
+        // If we have multiple selection (meaning our selection is an array), remove the array observer we set previously
         selection.removeArrayObserver(this, {
           willChange : 'selectionArrayWillChange',
           didChange : 'selectionArrayDidChange'
         });
       }
     }
+    
+    //Invoke Selectize's destroy
     this.selectize.destroy();
+    
+    //We are no longer in DOM
+    this.inDOM = false;
   },
+  /**
+   * Event callback that is triggered when user types in the input element
+   */
   _onType:function(str){
     set(this,'filter',str);
   },
+  /**
+   * Event callback triggered when an item is added (when something is selected)
+   * Here we need to update our selection property (if single selection) or array (if multiple selection)
+   */
   _onItemAdd : function(value) {
     var content = get(this,'content');
     var selection = get(this,'selection');
@@ -80,6 +126,10 @@ Ember.Selectize = Ember.View.extend({
     }
     this.selectize.close();
   },
+  /**
+   * Event callback triggered when an item is removed (when something is deselected)
+   * Here we need to update our selection property (if single selection, here set to null) or remove item from array (if multiple selection)
+   */
   _onItemRemove : function(value) {
     if(this.removing) return;
     var content = get(this,'content');
@@ -97,10 +147,12 @@ Ember.Selectize = Ember.View.extend({
       } 
     }
   },
-
+  /**
+   * Ember observer triggered when the selection property is changed
+   * We need to bind an array observer when selection is multiple
+   */
   _selectionDidChange : Ember.observer(function() {
-    var inDOM = get(this, 'inDOM');
-    if(!inDOM) return;
+    if(!this.inDOM) return;
     
     var multiple = get(this, 'multiple');
     var selection = get(this, 'selection');
@@ -133,6 +185,10 @@ Ember.Selectize = Ember.View.extend({
       }
     }
   }, 'selection'),
+  /*
+   * Triggered before the selection array changes
+   * Here we process the removed elements
+   */
   selectionArrayWillChange : function(array, idx, removedCount, addedCount) {
     this.removing = true;
     for (var i = idx; i < idx + removedCount; i++) {
@@ -140,21 +196,33 @@ Ember.Selectize = Ember.View.extend({
     }
     this.removing = false;
   },
+  /*
+   * Triggered after the selection array changes
+   * Here we process the inserted elements
+   */
   selectionArrayDidChange : function(array, idx, removedCount, addedCount) {
     for (var i = idx; i < idx + addedCount; i++) {
       this.selectionObjectWasAdded(array.objectAt(i), i);
     }
   },
+  /*
+   * Function that is responsible for Selectize's item inserting logic
+   */
   selectionObjectWasAdded : function(obj, index) {
-    //this.selectize.setCaret(index);
     if(this.selectize) this.selectize.addItem(get(obj,get(this,'_valuePath')));
   },
+  /*
+   * Function that is responsible for Selectize's item removing logic
+   */
   selectionObjectWasRemoved : function(obj) {
     if(this.selectize) this.selectize.removeItem(get(obj,get(this,'_valuePath')));
   },
+  /**
+   * Ember observer triggered when the content property is changed
+   * We need to bind an array observer to become notified of its changes
+   */
   _contentDidChange : Ember.observer(function() {
-    var inDOM = get(this, 'inDOM');
-    if(!inDOM) return;
+    if(!this.inDOM) return;
     var content = get(this, 'content');
     if (content) {
       content.addArrayObserver(this, {
@@ -165,16 +233,30 @@ Ember.Selectize = Ember.View.extend({
     var len = content ? get(content, 'length') : 0;
     this.contentArrayDidChange(content, 0, null, len);
   }, 'content'),
+  /*
+   * Triggered before the content array changes
+   * Here we process the removed elements
+   */
   contentArrayWillChange : function(array, idx, removedCount, addedCount) {
     for (var i = idx; i < idx + removedCount; i++) {
       this.objectWasRemoved(array.objectAt(i));
     }
   },
+  /*
+   * Triggered after the content array changes
+   * Here we process the inserted elements
+   */
   contentArrayDidChange : function(array, idx, removedCount, addedCount) {
     for (var i = idx; i < idx + addedCount; i++) {
       this.objectWasAdded(array.objectAt(i), i);
     }
   },
+  /*
+   * Function that is responsible for Selectize's option inserting logic
+   * If the option is an object or Ember instance, we set an observer on the label value of it.
+   * This way, we can later update the label of it.
+   * Useful for dealing with objects that 'lazy load' some properties/relationships.
+   */
   objectWasAdded : function(obj, index) {
     var data = {};
     if(typeOf(obj) === 'object' || typeOf(obj) === 'instance'){
@@ -198,23 +280,35 @@ Ember.Selectize = Ember.View.extend({
     }
     this._selectionDidChange();
   },
+  /*
+   * Function that is responsible for Selectize's option removing logic
+   */
   objectWasRemoved : function(obj) {
     Ember.removeObserver(obj,get(this,'_labelPath'),this,'_labelDidChange');
     if(this.selectize){
       this.selectize.removeOption(get(obj, get(this,'_valuePath')));
       this.selectize.refreshOptions(this.selectize.isFocused && !this.selectize.isInputHidden);
     }
+    //Trigger a selection change, because the previously selected item might not be available anymore.
     this._selectionDidChange();
   },
+  /*
+   * Ember Observer that triggers when an option's label changes.
+   * Here we need to update its corresponding option with the new data
+   */
   _labelDidChange: function(sender, key, value, rev) {
+    if(!this.selectize) return;
+    
     var data = {
       label : get(sender, get(this,'_labelPath')),
       value : get(sender, get(this,'_valuePath')),
       data : sender
     };
-    if(this.selectize)
-      this.selectize.updateOption(data.value,data);
+    this.selectize.updateOption(data.value,data);
   },
+  /*
+   * Observer on the disabled property that enables or disables selectize.
+   */
   _disabledDidChange: Ember.observer(function(){
     if(!this.selectize) return;
     var disable = get(this,'disabled');
