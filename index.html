@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>ember-selectize by miguelcobain</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>ember-selectize</h1>
+        <p>An Ember and Selectize integration.</p>
+
+        <p class="view"><a href="https://github.com/miguelcobain/ember-selectize">View the Project on GitHub <small>miguelcobain/ember-selectize</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/miguelcobain/ember-selectize/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/miguelcobain/ember-selectize/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/miguelcobain/ember-selectize">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="ember-selectize" class="anchor" href="#ember-selectize"><span class="octicon octicon-link"></span></a>ember-selectize</h1>
+
+<p>An Ember and Selectize integration. Check <a href="http://brianreavis.github.io/selectize.js/">Selectize</a>!</p>
+
+<h3>
+<a name="browser-support" class="anchor" href="#browser-support"><span class="octicon octicon-link"></span></a>Browser Support</h3>
+
+<p>Should run wherever Ember and Selectize run.</p>
+
+<h3>
+<a name="how-to-use" class="anchor" href="#how-to-use"><span class="octicon octicon-link"></span></a>How to use</h3>
+
+<p>Just grab the <code>src/ember.selectize.js</code> and drop/include in your build pipeline.
+Building automation is not available since this is a very simple project (basically an <code>Ember.View</code>).</p>
+
+<p>The usage should be very similar to <code>Ember.Select</code>. For example, in a template you could write:</p>
+
+<pre lang="handlebars"><code>{{ view Ember.Selectize id="type"
+  contentBinding="controller.types"
+  optionValuePath="content.id"
+  optionLabelPath="content.name"
+  selectionBinding="model.type"
+  placeholder="Select an option" }}
+</code></pre>
+
+<h3>
+<a name="tests" class="anchor" href="#tests"><span class="octicon octicon-link"></span></a>Tests</h3>
+
+<p>Open <code>tests/index.html</code> in a browser.</p>
+
+<p>Tests are written in qunit, and were borrowed from <code>Ember.Select</code>.</p>
+
+<p>I've rewritten many of them, but most of them still fail.</p>
+
+<p>This is due to the nature of this component. <code>Selectize</code>'s tests assures that everything is ok between Selectize&lt;-&gt;DOM.
+<code>Ember.Select</code>'s tests also test the DOM. This is unecessary in this project. </p>
+
+<p>Ember-selectize tests should be focused between Ember&lt;-&gt;Selectize.</p>
+
+<p><strong>There is still much to do here.</strong></p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/miguelcobain">miguelcobain</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
