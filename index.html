@@ -7,6 +7,8 @@
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/selectize.css">
+    <link rel="stylesheet" href="stylesheets/selectize.default.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -33,13 +35,42 @@
 
 <p>An Ember and Selectize integration. Check <a href="http://brianreavis.github.io/selectize.js/">Selectize</a>!</p>
 
-<h3>
-<a name="browser-support" class="anchor" href="#browser-support"><span class="octicon octicon-link"></span></a>Browser Support</h3>
+<h2>Demo</h2>
+<div id="single-app"></div>
+<script type="text/x-handlebars" data-template-name="single">
+{{ view Ember.Selectize id="single"
+  contentBinding="controller"
+  optionValuePath="content.id"
+  optionLabelPath="content.name"
+  selectionBinding="selected"
+  placeholder="Select a person" }}
+<p><b>Selected Person:</b> {{#if selected}}{{selected.name}}{{else}}<em>Please select a person</em>{{/if}}</p>
+</script>
+<div id="multi-app"></div>
+<script type="text/x-handlebars" data-template-name="multi">
+{{ view Ember.Selectize id="multi"
+  contentBinding="controller"
+  optionValuePath="content.id"
+  optionLabelPath="content.name"
+  selectionBinding="selected"
+  multiple=true
+  placeholder="Select people" }}
+<p style="margin:0"><b>Selected People:</b></p>
+    <ul>
+      {{#each selected}}
+        <li>{{name}}</li>
+      {{else}}
+        <li><em>Please select a person</em></li>
+      {{/each}}
+    </ul>
+</script>
+<h2>
+<a name="browser-support" class="anchor" href="#browser-support"><span class="octicon octicon-link"></span></a>Browser Support</h2>
 
 <p>Should run wherever Ember and Selectize run.</p>
 
-<h3>
-<a name="how-to-use" class="anchor" href="#how-to-use"><span class="octicon octicon-link"></span></a>How to use</h3>
+<h2>
+<a name="how-to-use" class="anchor" href="#how-to-use"><span class="octicon octicon-link"></span></a>How to use</h2>
 
 <p>Just grab the <code>src/ember.selectize.js</code> and drop/include in your build pipeline.
 Building automation is not available since this is a very simple project (basically an <code>Ember.View</code>).</p>
@@ -54,8 +85,8 @@ Building automation is not available since this is a very simple project (basica
   placeholder="Select an option" }}
 </code></pre>
 
-<h3>
-<a name="tests" class="anchor" href="#tests"><span class="octicon octicon-link"></span></a>Tests</h3>
+<h2>
+<a name="tests" class="anchor" href="#tests"><span class="octicon octicon-link"></span></a>Tests</h2>
 
 <p>Open <code>tests/index.html</code> in a browser.</p>
 
@@ -76,6 +107,11 @@ Building automation is not available since this is a very simple project (basica
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
-    
+    <script src="javascripts/jquery.js"></script>
+    <script src="javascripts/handlebars.js"></script>
+    <script src="javascripts/ember.js"></script>
+    <script src="javascripts/selectize.js"></script>
+    <script src="javascripts/ember.selectize.js"></script>
+    <script src="javascripts/app.js"></script>
   </body>
 </html>
