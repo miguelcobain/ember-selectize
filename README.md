@@ -2,6 +2,10 @@
 
 An Ember and Selectize integration. Check [Selectize](http://brianreavis.github.io/selectize.js/)!
 
+## Demo
+
+Check http://miguelcobain.github.io/ember-selectize
+
 ## Browser Support
 
 Should run wherever Ember and Selectize run.
