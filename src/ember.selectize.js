@@ -147,6 +147,24 @@ Ember.Selectize = Ember.View.extend({
       } 
     }
   },
+    /**
+   * Ember observer triggered before the selection property is changed
+   * We need to unbind any array observers if we're in multiple selection
+   */
+  _selectionWillChange: Ember.beforeObserver(function() {
+    if(!this.inDOM) return;
+    
+    var multiple = get(this, 'multiple');
+    var selection = get(this, 'selection');
+    if(selection && isArray(selection) && multiple) {
+      selection.removeArrayObserver(this,  {
+        willChange : 'selectionArrayWillChange',
+        didChange : 'selectionArrayDidChange'
+      });
+      var len = selection ? get(selection, 'length') : 0;
+      this.selectionArrayWillChange(selection, 0, len);
+    }
+  }, 'selection'),
   /**
    * Ember observer triggered when the selection property is changed
    * We need to bind an array observer when selection is multiple
@@ -171,11 +189,10 @@ Ember.Selectize = Ember.View.extend({
         set(this,'selection',[]);
         return;
       }
-      this.selectize.clear();
       var len = selection ? get(selection, 'length') : 0;
       this.selectionArrayDidChange(selection, 0, null, len);
     } else {
-      if(selection && this.selectize) {
+      if(selection) {
         this.selectize.addItem(get(selection,get(this,'_valuePath')));
       } else {
         set(this,'selection',null);
@@ -222,8 +239,7 @@ Ember.Selectize = Ember.View.extend({
    * We need to unbind any array observers
    */
   _contentWillChange: Ember.beforeObserver(function() {
-    var inDOM = get(this, 'inDOM');
-    if(!inDOM) return;
+    if(!this.inDOM) return;
     var content = get(this, 'content');
     if(content) {
       content.removeArrayObserver(this, {

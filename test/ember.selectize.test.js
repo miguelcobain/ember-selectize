@@ -451,6 +451,37 @@ test("upon content change, selectize should reflect the changes (options)", func
   equal(asArray(selectizeView.selectize.options).length, 0, "Should have no options");
 });
 
+test("upon selection change, selectize should reflect the changes (items)", function() {
+  var yehuda = { id: 1, firstName: 'Yehuda' },
+    tom = { id: 2, firstName: 'Tom' },
+    david = { id: 3, firstName: 'David' },
+    brennain = { id: 4, firstName: 'Brennain' },
+    selection = Ember.A([yehuda, david]);
+      
+  Ember.run(function() {
+    selectizeView.set('optionLabelPath', 'content.firstName');
+    selectizeView.set('optionValuePath', 'content.id');
+    
+    selectizeView.set('multiple', true);
+    selectizeView.set('content', Ember.A([yehuda, tom, david, brennain]));
+  });
+  
+  append();
+  
+  Ember.run(function() {
+    selectizeView.set('selection', Ember.A([yehuda, david]));
+  });
+  
+  deepEqual(selectizeView.get('content'), [yehuda, tom, david, brennain], "Initial content should be correct");
+  deepEqual(selectizeView.selectize.items, [yehuda.id+"",david.id+""], "Initial selection should be correct");
+  
+  Ember.run(function() {
+    selectizeView.set('selection',Ember.A([david,brennain]));
+  });
+  
+  deepEqual(selectizeView.selectize.items, [david.id+"",brennain.id+""], "Selectize's items should reflect changes");
+});
+
 /*
 test("Ember.SelectedOption knows when it is selected when multiple=false", function() {
   var yehuda = { id: 1, firstName: 'Yehuda' },
