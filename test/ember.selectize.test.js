@@ -425,6 +425,32 @@ test("selection uses the same array when multiple=true", function() {
   deepEqual(selection, [tom,david], "On change the original selection array is updated");
 });
 
+test("upon content change, selectize should reflect the changes (options)", function() {
+  var yehuda = { id: 1, firstName: 'Yehuda' },
+    tom = { id: 2, firstName: 'Tom' },
+    david = { id: 3, firstName: 'David' },
+    brennain = { id: 4, firstName: 'Brennain' },
+    selection = Ember.A([yehuda, david]);
+      
+  Ember.run(function() {
+    selectizeView.set('optionLabelPath', 'content.firstName');
+    selectizeView.set('optionValuePath', 'content.id');
+    
+    selectizeView.set('multiple', true);
+    selectizeView.set('content', Ember.A([yehuda, tom, david, brennain]));
+  });
+  
+  append();
+  
+  deepEqual(selectizeView.get('content'), [yehuda, tom, david, brennain], "Initial content should be correct");
+  
+  Ember.run(function() {
+    selectizeView.set('content',[]);
+  });
+  
+  equal(asArray(selectizeView.selectize.options).length, 0, "Should have no options");
+});
+
 /*
 test("Ember.SelectedOption knows when it is selected when multiple=false", function() {
   var yehuda = { id: 1, firstName: 'Yehuda' },
@@ -726,40 +752,6 @@ test("upon content change, the DOM should reflect the selection (#481)", functio
   equal(selectEl.selectedIndex, 1, "The DOM reflects the correct selection");
 });
 
-test("upon content change with Array-like content, the DOM should reflect the selection", function() {
-  var tom = {id: 4, name: 'Tom'},
-      sylvain = {id: 5, name: 'Sylvain'};
-
-  var proxy = Ember.ArrayProxy.create({
-    content: Ember.A(),
-    selectedOption: sylvain
-  });
-
-  view = Ember.View.create({
-    proxy: proxy,
-    template: Ember.Handlebars.compile(
-      '{{view Ember.Select viewName="select"' +
-      '    contentBinding="view.proxy"' +
-      '    selectionBinding="view.proxy.selectedOption"}}'
-    )
-  });
-
-  Ember.run(function() {
-    view.appendTo('#qunit-fixture');
-  });
-
-  var select = view.get('select'),
-      selectEl = select.$()[0];
-
-  equal(selectEl.selectedIndex, -1, "Precond: The DOM reflects the lack of selection");
-
-  Ember.run(function() {
-    proxy.set('content', Ember.A([tom, sylvain]));
-  });
-
-  equal(select.get('selection'), sylvain, "Selection was properly set after content change");
-  equal(selectEl.selectedIndex, 1, "The DOM reflects the correct selection");
-});
 
 function testValueBinding(templateString) {
   view = Ember.View.create({

@@ -218,6 +218,28 @@ Ember.Selectize = Ember.View.extend({
     if(this.selectize) this.selectize.removeItem(get(obj,get(this,'_valuePath')));
   },
   /**
+   * Ember observer triggered before the content property is changed
+   * We need to unbind any array observers
+   */
+  _contentWillChange: Ember.beforeObserver(function() {
+    var inDOM = get(this, 'inDOM');
+    if(!inDOM) return;
+    var content = get(this, 'content');
+    if(content) {
+      content.removeArrayObserver(this, {
+        willChange : 'contentArrayWillChange',
+        didChange : 'contentArrayDidChange'
+      });
+      //Remove observers from each element's label property
+      content.forEach(function(item){
+        if(typeOf(item) === 'object' || typeOf(item) === 'instance')
+          Ember.removeObserver(item,get(this,'_labelPath'),this,'_labelDidChange');
+      },this);
+    }
+    var len = content ? get(content, 'length') : 0;
+    this.contentArrayWillChange(content, 0, len);
+  }, 'content'),
+  /**
    * Ember observer triggered when the content property is changed
    * We need to bind an array observer to become notified of its changes
    */
