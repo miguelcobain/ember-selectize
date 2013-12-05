@@ -9,6 +9,8 @@ Ember.Selectize = Ember.View.extend({
   classNames : ['ember-selectize'],
   
   autocomplete:'off',
+  // Allows to use prompt (like in Ember.Select) or placeholder property
+  placeholder: Ember.computed.alias('prompt'),
   tagName : 'select',
   
   /**
