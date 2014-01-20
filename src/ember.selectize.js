@@ -126,7 +126,6 @@ Ember.Selectize = Ember.View.extend({
           set(this,'selection',obj);
       }
     }
-    this.selectize.close();
   },
   /**
    * Event callback triggered when an item is removed (when something is deselected)
