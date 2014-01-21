@@ -9,6 +9,8 @@ Ember.Selectize = Ember.View.extend({
   classNames : ['ember-selectize'],
   
   autocomplete:'off',
+  // Allows to use prompt (like in Ember.Select) or placeholder property
+  placeholder: Ember.computed.alias('prompt'),
   tagName : 'select',
   
   /**
@@ -65,31 +67,10 @@ Ember.Selectize = Ember.View.extend({
     this._selectionDidChange();
   },
   willDestroyElement : function() {
-    var content = get(this, 'content');
-    var multiple = get(this, 'multiple');
-    
-    if (content) {
-      //Remove observers from content array
-      content.removeArrayObserver(this, {
-        willChange : 'contentArrayWillChange',
-        didChange : 'contentArrayDidChange'
-      });
-      //Remove observers from each element's label property
-      content.forEach(function(item){
-        if(typeOf(item) === 'object' || typeOf(item) === 'instance')
-          Ember.removeObserver(item,get(this,'_labelPath'),this,'_labelDidChange');
-      },this);
-    }
-    if(multiple){
-      var selection = get(this, 'selection');
-      if(selection) {
-        // If we have multiple selection (meaning our selection is an array), remove the array observer we set previously
-        selection.removeArrayObserver(this, {
-          willChange : 'selectionArrayWillChange',
-          didChange : 'selectionArrayDidChange'
-        });
-      }
-    }
+
+    //Unbind observers
+    this._contentWillChange();
+    this._selectionWillChange();
     
     //Invoke Selectize's destroy
     this.selectize.destroy();
@@ -141,7 +122,7 @@ Ember.Selectize = Ember.View.extend({
       },this);
       if(multiple && isArray(selection) && obj){
         selection.removeObject(obj);
-      } else {
+      } else if(!multiple){
         this.set('selection',null);
       } 
     }
@@ -151,7 +132,6 @@ Ember.Selectize = Ember.View.extend({
    * We need to unbind any array observers if we're in multiple selection
    */
   _selectionWillChange: Ember.beforeObserver(function() {
-    if(!this.inDOM) return;
     
     var multiple = get(this, 'multiple');
     var selection = get(this, 'selection');
@@ -245,14 +225,13 @@ Ember.Selectize = Ember.View.extend({
         willChange : 'contentArrayWillChange',
         didChange : 'contentArrayDidChange'
       });
-      //Remove observers from each element's label property
-      content.forEach(function(item){
-        if(typeOf(item) === 'object' || typeOf(item) === 'instance')
-          Ember.removeObserver(item,get(this,'_labelPath'),this,'_labelDidChange');
-      },this);
     }
+    //Trigger remove logic
     var len = content ? get(content, 'length') : 0;
+    this.removing = true;
     this.contentArrayWillChange(content, 0, len);
+    this.removing = false;
+    this._selectionDidChange();
   }, 'content'),
   /**
    * Ember observer triggered when the content property is changed
@@ -278,6 +257,7 @@ Ember.Selectize = Ember.View.extend({
     for (var i = idx; i < idx + removedCount; i++) {
       this.objectWasRemoved(array.objectAt(i));
     }
+    this._selectionDidChange();
   },
   /*
    * Triggered after the content array changes
@@ -287,6 +267,7 @@ Ember.Selectize = Ember.View.extend({
     for (var i = idx; i < idx + addedCount; i++) {
       this.objectWasAdded(array.objectAt(i), i);
     }
+    this._selectionDidChange();
   },
   /*
    * Function that is responsible for Selectize's option inserting logic
@@ -315,19 +296,20 @@ Ember.Selectize = Ember.View.extend({
       this.selectize.addOption(data);
       this.selectize.refreshOptions(this.selectize.isFocused && !this.selectize.isInputHidden);
     }
-    this._selectionDidChange();
+    //this._selectionDidChange();
   },
   /*
    * Function that is responsible for Selectize's option removing logic
    */
   objectWasRemoved : function(obj) {
-    Ember.removeObserver(obj,get(this,'_labelPath'),this,'_labelDidChange');
+    if(typeOf(obj) === 'object' || typeOf(obj) === 'instance')
+          Ember.removeObserver(obj,get(this,'_labelPath'),this,'_labelDidChange');
     if(this.selectize){
       this.selectize.removeOption(get(obj, get(this,'_valuePath')));
       this.selectize.refreshOptions(this.selectize.isFocused && !this.selectize.isInputHidden);
     }
     //Trigger a selection change, because the previously selected item might not be available anymore.
-    this._selectionDidChange();
+    //this._selectionDidChange();
   },
   /*
    * Ember Observer that triggers when an option's label changes.
