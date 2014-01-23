@@ -41,9 +41,22 @@ Ember.Selectize = Ember.View.extend({
    */
   inDOM: false,
   
+  /**
+   * Pass true to 'create' property to enable tag creation mode.
+   * When active, ember-selectize will send a 'create' action to its controller when a tag is created.
+   * Alternatively, you can pass a string to 'createAction' property and 
+   * ember-selectize will activite tag creation mode send an action with that name to its controller.
+   */
+  create:false,
+  createAction:'create',
+  
   didInsertElement : function() {
     //View is now in DOM
     this.inDOM = true;
+    
+    //Normalize create property if createAction was set
+    if(this.createAction && (this.createAction !== 'create'))
+      this.create = true;
     
     //Create Selectize's instance
     //We proxy callbacks through jQuery's 'proxy' to have the callbacks context set to 'this'
@@ -52,6 +65,7 @@ Ember.Selectize = Ember.View.extend({
       labelField : 'label',
       valueField : 'value',
       searchField : 'label',
+      create: this.create ? $.proxy(this._create, this) : false,
       onItemAdd : $.proxy(this._onItemAdd, this),
       onItemRemove : $.proxy(this._onItemRemove, this),
       onType : $.proxy(this._onType, this)
@@ -77,6 +91,18 @@ Ember.Selectize = Ember.View.extend({
     
     //We are no longer in DOM
     this.inDOM = false;
+  },
+  /**
+   * Event callback that is triggered when user creates a tag
+   */
+  _create:function(input,callback){
+    // Delete user entered text
+    this.selectize.setTextboxValue('');
+    // Send action to controller
+    get(this,'controller').send(get(this,'createAction'),input);
+    // We cancel the creation here, so it's up to you to include the created element
+    // in the content and selection property
+    callback(null);
   },
   /**
    * Event callback that is triggered when user types in the input element
