@@ -600,6 +600,52 @@ test("can set selection before content (multiple, in-place)", function() {
 
 });
 
+asyncTest("creating tags sends 'create' action to controller with correct input", function() {
+
+  var newValue = "New value to create";
+  
+  var controller = Ember.Controller.createWithMixins({
+    actions:{
+      create:function(input){
+        equal(input,newValue);
+        start();
+      }
+    }
+  });
+  
+  selectizeView.set('create',true);
+  selectizeView.set('controller',controller);
+  
+  append();
+  
+  selectizeView.selectize.setTextboxValue(newValue);
+  selectizeView.selectize.createItem();
+  
+});
+
+asyncTest("creating tags sends action with custom name to controller with correct input", function() {
+
+  var newValue = "New value to create with custom action name";
+  
+  var controller = Ember.Controller.createWithMixins({
+    actions:{
+      anyActionNameWouldDo:function(input){
+        equal(input,newValue);
+        start();
+      }
+    }
+  });
+  
+  selectizeView.set('createAction','anyActionNameWouldDo');
+  selectizeView.set('controller',controller);
+  
+  append();
+  
+  selectizeView.selectize.setTextboxValue(newValue);
+  selectizeView.selectize.createItem();
+  
+});
+
 /*
 test("Ember.SelectedOption knows when it is selected when multiple=false", function() {
   var yehuda = { id: 1, firstName: 'Yehuda' },
