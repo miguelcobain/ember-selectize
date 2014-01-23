@@ -36,6 +36,7 @@
 <p>An Ember and Selectize integration. Check <a href="http://brianreavis.github.io/selectize.js/">Selectize</a>!</p>
 
 <h2>Demo</h2>
+<h4>Single selection</h4>
 <div id="single-app"></div>
 <script type="text/x-handlebars" data-template-name="single">
 {{ view Ember.Selectize id="single"
@@ -46,6 +47,7 @@
   placeholder="Select a person" }}
 <p><b>Selected Person:</b> {{#if selected}}{{selected.name}}{{else}}<em>Please select a person</em>{{/if}}</p>
 </script>
+<h4>Multiple selection</h4>
 <div id="multi-app"></div>
 <script type="text/x-handlebars" data-template-name="multi">
 {{ view Ember.Selectize id="multi"
@@ -54,6 +56,26 @@
   optionLabelPath="content.name"
   selectionBinding="selected"
   multiple=true
+  placeholder="Select people" }}
+<p style="margin:0"><b>Selected People:</b></p>
+    <ul>
+      {{#each selected}}
+        <li>{{name}}</li>
+      {{else}}
+        <li><em>Please select a person</em></li>
+      {{/each}}
+    </ul>
+</script>
+<h4>Item creation</h4>
+<div id="create-app"></div>
+<script type="text/x-handlebars" data-template-name="create">
+{{ view Ember.Selectize id="multi-create"
+  contentBinding="controller"
+  optionValuePath="content.id"
+  optionLabelPath="content.name"
+  selectionBinding="selected"
+  multiple=true
+  create=true
   placeholder="Select people" }}
 <p style="margin:0"><b>Selected People:</b></p>
     <ul>

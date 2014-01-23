@@ -48,3 +48,21 @@ MultipleApp.ApplicationController = Ember.ArrayController.extend({
 MultipleApp.ApplicationView = Ember.View.extend({
   templateName:'multi'
 });
+
+CreateApp = Ember.Application.create({rootElement: '#create-app'});
+CreateApp.ApplicationController = Ember.ArrayController.extend({
+    content:people,
+    actions:{
+      create:function(input){
+        var obj = {
+          id:input,
+          name:input
+        };
+        this.get('content').pushObject(obj);
+        this.get('selected').pushObject(obj);
+      }
+    }
+});
+CreateApp.ApplicationView = Ember.View.extend({
+  templateName:'create'
+});
