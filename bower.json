@@ -1,0 +1,39 @@
+{
+  "name": "ember-selectize",
+  "version": "0.0.1",
+  "homepage": "http://miguelcobain.github.io/ember-selectize/",
+  "authors": [
+    "miguelcobain <jmandrade0@gmail.com>"
+  ],
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/miguelcobain/ember-selectize.git"
+  },
+  "description": "An Ember and Selectize integration.",
+  "main": "src/ember.selectize.js",
+  "keywords": [
+    "ember",
+    "selectize",
+    "select",
+    "box",
+    "combo",
+    "selectbox",
+    "combobox"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "lib"
+  ],
+  "dependencies": {
+    "ember": "~1.2",
+    "selectize" : "~0.9.0"
+  },
+  "devDependencies": {
+    "qunit":"1.11.0"
+  }
+}
