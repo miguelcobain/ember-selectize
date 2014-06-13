@@ -25,6 +25,16 @@ The usage should be very similar to `Ember.Select`. For example, in a template y
   selectionBinding="model.type"
   placeholder="Select an option" }}
 ```
+
+## Build
+
+```js
+npm install
+npm run build
+```
+
+This will create a `./dist` directory and generate a minified version.
+
 ## Tests
 
 ```js
