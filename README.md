@@ -27,7 +27,10 @@ The usage should be very similar to `Ember.Select`. For example, in a template y
 ```
 ## Tests
 
-Open `tests/index.html` in a browser.
+```js
+npm install
+npm test # open localhost:3000
+```
 
 Tests are written in qunit, and were borrowed from `Ember.Select`.
 
