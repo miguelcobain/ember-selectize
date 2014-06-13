@@ -2,13 +2,14 @@
   "name": "ember-selectize",
   "version": "0.1.0",
   "description": "An Ember and Selectize integration. ",
-  "main": "index.js",
+  "main": "src/ember.selectize.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "test": "goat -e test/index.html bower_components/:/bower_components src/:/src",
-    "postinstall": "bower install"
+    "postinstall": "bower install",
+    "build": "mkdir dist && uglifyjs src/ember.selectize.js -m -c > dist/ember.selectize.min.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
   "homepage": "https://github.com/miguelcobain/ember-selectize",
   "devDependencies": {
     "bower": "^1.3.5",
-    "goat": "^0.3.0"
+    "goat": "^0.3.0",
+    "uglify-js": "^2.4.14"
   }
 }
