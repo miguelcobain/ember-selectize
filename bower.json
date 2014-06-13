@@ -30,10 +30,12 @@
     "lib"
   ],
   "dependencies": {
-    "ember": "~1.2",
-    "selectize" : "~0.9.0"
+    "ember": "~1.5.1",
+    "selectize": "~0.9.0"
   },
   "devDependencies": {
-    "qunit":"1.11.0"
+    "qunit": "~1.14.0",
+    "selectize": "~0.10.1",
+    "jquery": "1.11.1"
   }
 }

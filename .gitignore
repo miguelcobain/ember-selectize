@@ -3,3 +3,5 @@
 *.swp
 *.swo
 .project
+bower_components
+node_modules
