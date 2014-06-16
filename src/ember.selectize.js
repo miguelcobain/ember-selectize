@@ -1,4 +1,4 @@
-var get = Ember.get, set = Ember.set, isArray = Ember.isArray, typeOf = Ember.typeOf;
+var get = Ember.get, set = Ember.set, isArray = Ember.isArray, typeOf = Ember.typeOf, getWithDefault = Ember.getWithDefault;
 
 /**
  * Ember.Selectize is an Ember View that encapsulates a Selectize component.
@@ -29,10 +29,10 @@ Ember.Selectize = Ember.View.extend({
    * as it is done on Ember.Select
    */
   _valuePath : Ember.computed('optionValuePath',function(){
-    return get(this,'optionValuePath').replace(/^content\.?/, '');
+    return getWithDefault(this,'optionValuePath','').replace(/^content\.?/, '');
   }),
   _labelPath : Ember.computed('optionLabelPath',function(){
-    return get(this,'optionLabelPath').replace(/^content\.?/, '');
+    return getWithDefault(this,'optionLabelPath','').replace(/^content\.?/, '');
   }),
   
   /**
