@@ -51,12 +51,14 @@ Ember.Selectize = Ember.View.extend({
   createAction:'create',
   
   didInsertElement : function() {
+    var allowCreate = get(this, 'create');
+    var createAction = get(this, 'createAction');
     //View is now in DOM
     this.inDOM = true;
     
     //Normalize create property if createAction was set
-    if(this.createAction && (this.createAction !== 'create'))
-      this.create = true;
+    if(createAction && (createAction !== 'create'))
+      allowCreate = true;
     
     //Create Selectize's instance
     //We proxy callbacks through jQuery's 'proxy' to have the callbacks context set to 'this'
@@ -65,7 +67,7 @@ Ember.Selectize = Ember.View.extend({
       labelField : 'label',
       valueField : 'value',
       searchField : 'label',
-      create: this.create ? $.proxy(this._create, this) : false,
+      create: allowCreate ? $.proxy(this._create, this) : false,
       onItemAdd : $.proxy(this._onItemAdd, this),
       onItemRemove : $.proxy(this._onItemRemove, this),
       onType : $.proxy(this._onType, this)
