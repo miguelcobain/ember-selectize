@@ -52,11 +52,12 @@ Ember.Selectize = Ember.View.extend({
   
   didInsertElement : function() {
     var allowCreate = get(this, 'create');
+    var createAction = get(this, 'createAction');
     //View is now in DOM
     this.inDOM = true;
     
     //Normalize create property if createAction was set
-    if(this.createAction && (this.createAction !== 'create'))
+    if(createAction && (createAction !== 'create'))
       allowCreate = true;
     
     //Create Selectize's instance
