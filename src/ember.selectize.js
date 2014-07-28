@@ -1,4 +1,4 @@
-var get = Ember.get, set = Ember.set, isArray = Ember.isArray, typeOf = Ember.typeOf;
+var get = Ember.get, set = Ember.set, isArray = Ember.isArray, typeOf = Ember.typeOf, getWithDefault = Ember.getWithDefault;
 
 /**
  * Ember.Selectize is an Ember View that encapsulates a Selectize component.
@@ -14,10 +14,10 @@ Ember.Selectize = Ember.View.extend({
   tagName: 'select',
   
   /**
-   * default object paths for value and label paths
+   * overrideable object paths for value and label paths
    */
-  optionValuePath: 'content.value',
-  optionLabelPath: 'content.label',
+  optionValuePath : null,
+  optionLabelPath : null,
   
   /**
    * The array of the default plugins to load into selectize
@@ -28,12 +28,11 @@ Ember.Selectize = Ember.View.extend({
    * Computed properties that hold the processed paths ('content.' replacement),
    * as it is done on Ember.Select
    */
-  _valuePath: Ember.computed('optionValuePath', function () {
-    return get(this, 'optionValuePath').replace(/^content\.?/, '');
+  _valuePath : Ember.computed('optionValuePath',function(){
+    return getWithDefault(this,'optionValuePath','content.value').replace(/^content\.?/, '');
   }),
-
-  _labelPath: Ember.computed('optionLabelPath', function () {
-    return get(this, 'optionLabelPath').replace(/^content\.?/, '');
+  _labelPath : Ember.computed('optionLabelPath',function(){
+    return getWithDefault(this,'optionLabelPath','content.label').replace(/^content\.?/, '');
   }),
   
   /**
@@ -51,26 +50,27 @@ Ember.Selectize = Ember.View.extend({
   create: false,
   createAction: 'create',
   
-  didInsertElement: function () {
+  didInsertElement : function() {
+    var allowCreate = get(this, 'create');
+    var createAction = get(this, 'createAction');
     //View is now in DOM
     this.inDOM = true;
     
     //Normalize create property if createAction was set
-    if (this.createAction && (this.createAction !== 'create')) {
-      this.create = true;
-    }
+    if(createAction && (createAction !== 'create'))
+      allowCreate = true;
     
     //Create Selectize's instance
     //We proxy callbacks through jQuery's 'proxy' to have the callbacks context set to 'this'
     this.$().selectize({
       plugins: this.plugins,
-      labelField: 'label',
-      valueField: 'value',
-      searchField: 'label',
-      create: this.create ? $.proxy(this._create, this) : false,
-      onItemAdd: $.proxy(this._onItemAdd, this),
-      onItemRemove: $.proxy(this._onItemRemove, this),
-      onType: $.proxy(this._onType, this)
+      labelField : 'label',
+      valueField : 'value',
+      searchField : 'label',
+      create: allowCreate ? $.proxy(this._create, this) : false,
+      onItemAdd : $.proxy(this._onItemAdd, this),
+      onItemRemove : $.proxy(this._onItemRemove, this),
+      onType : $.proxy(this._onType, this)
     });
     
     //Save the created selectize instance
