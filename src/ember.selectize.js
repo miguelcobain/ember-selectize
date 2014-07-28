@@ -1,10 +1,13 @@
-var get = Ember.get, set = Ember.set, isArray = Ember.isArray, typeOf = Ember.typeOf, getWithDefault = Ember.getWithDefault;
+var get = Ember.get,
+  set = Ember.set,
+  isArray = Ember.isArray,
+  typeOf = Ember.typeOf;
 
 /**
  * Ember.Selectize is an Ember View that encapsulates a Selectize component.
  * The goal is to use this as a near dropin replacement for Ember.Select.
  */
-Ember.Selectize = Ember.View.extend({
+Ember.Selectize = Ember.Component.extend({
   attributeBindings: ['multiple', 'placeholder','autocomplete'],
   classNames: ['ember-selectize'],
   
@@ -16,8 +19,8 @@ Ember.Selectize = Ember.View.extend({
   /**
    * overrideable object paths for value and label paths
    */
-  optionValuePath : null,
-  optionLabelPath : null,
+  optionValuePath: 'content.value',
+  optionLabelPath: 'content.label',
   
   /**
    * The array of the default plugins to load into selectize
@@ -29,10 +32,10 @@ Ember.Selectize = Ember.View.extend({
    * as it is done on Ember.Select
    */
   _valuePath : Ember.computed('optionValuePath',function(){
-    return getWithDefault(this,'optionValuePath','content.value').replace(/^content\.?/, '');
+    return get(this,'optionValuePath').replace(/^content\.?/, '');
   }),
   _labelPath : Ember.computed('optionLabelPath',function(){
-    return getWithDefault(this,'optionLabelPath','content.label').replace(/^content\.?/, '');
+    return get(this,'optionLabelPath').replace(/^content\.?/, '');
   }),
   
   /**
@@ -200,7 +203,7 @@ Ember.Selectize = Ember.View.extend({
     
     var multiple = get(this, 'multiple');
     var selection = get(this, 'selection');
-
+  
     if (multiple) {
       if (selection) {
         if (!isArray(selection)) {
