@@ -16,8 +16,8 @@ Ember.Selectize = Ember.View.extend({
   /**
    * overrideable object paths for value and label paths
    */
-  optionValuePath : null,
-  optionLabelPath : null,
+  optionValuePath : undefined,
+  optionLabelPath : undefined,
   
   /**
    * The array of the default plugins to load into selectize
@@ -160,7 +160,7 @@ Ember.Selectize = Ember.View.extend({
    * We need to unbind any array observers if we're in multiple selection
    */
   _selectionWillChange: Ember.beforeObserver(function() {
-    
+    console.log('HERE!!!');
     var multiple = get(this, 'multiple');
     var selection = get(this, 'selection');
     if(selection && isArray(selection) && multiple) {
