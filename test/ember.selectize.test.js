@@ -801,44 +801,6 @@ test("should be able to select an option and then reselect the prompt", function
   equal(selectizeView.$()[0].selectedIndex, 0);
 });
 
-test("should be able to get the current selection's value", function() {
-  Ember.run(function() {
-    selectizeView.set('content', Ember.A([
-      {label: 'Yehuda Katz', value: 'wycats'},
-      {label: 'Tom Dale', value: 'tomdale'},
-      {label: 'Peter Wagenet', value: 'wagenet'},
-      {label: 'Erik Bryn', value: 'ebryn'}
-    ]));
-    selectizeView.set('optionLabelPath', 'content.label');
-    selectizeView.set('optionValuePath', 'content.value');
-  });
-
-  append();
-
-  equal(selectizeView.get('value'), 'wycats');
-});
-
-test("should be able to set the current selection by value", function() {
-  var ebryn = {label: 'Erik Bryn', value: 'ebryn'};
-
-  Ember.run(function() {
-    selectizeView.set('content', Ember.A([
-      {label: 'Yehuda Katz', value: 'wycats'},
-      {label: 'Tom Dale', value: 'tomdale'},
-      {label: 'Peter Wagenet', value: 'wagenet'},
-      ebryn
-    ]));
-    selectizeView.set('optionLabelPath', 'content.label');
-    selectizeView.set('optionValuePath', 'content.value');
-    selectizeView.set('value', 'ebryn');
-  });
-
-  append();
-
-  equal(selectizeView.get('value'), 'ebryn');
-  equal(selectizeView.get('selection'), ebryn);
-});
-
 module("Ember.Selectize - usage inside templates", {
   setup: function() {
     dispatcher = Ember.EventDispatcher.create();
