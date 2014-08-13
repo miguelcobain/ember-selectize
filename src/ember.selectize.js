@@ -45,7 +45,7 @@ Ember.Selectize = Ember.View.extend({
    * Pass true to 'create' property to enable tag creation mode.
    * When active, ember-selectize will send a 'create' action to its controller when a tag is created.
    * Alternatively, you can pass a string to 'createAction' property and 
-   * ember-selectize will activite tag creation mode send an action with that name to its controller.
+   * ember-selectize will activate tag creation mode send an action with that name to its controller.
    */
   create:false,
   createAction:'create',
