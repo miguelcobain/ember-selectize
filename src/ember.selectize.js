@@ -67,10 +67,10 @@ Ember.Selectize = Ember.View.extend({
       labelField : 'label',
       valueField : 'value',
       searchField : 'label',
-      create: allowCreate ? $.proxy(this._create, this) : false,
-      onItemAdd : $.proxy(this._onItemAdd, this),
-      onItemRemove : $.proxy(this._onItemRemove, this),
-      onType : $.proxy(this._onType, this)
+      create: allowCreate ? Ember.$.proxy(this._create, this) : false,
+      onItemAdd : Ember.$.proxy(this._onItemAdd, this),
+      onItemRemove : Ember.$.proxy(this._onItemRemove, this),
+      onType : Ember.$.proxy(this._onType, this)
     });
     
     //Save the created selectize instance
