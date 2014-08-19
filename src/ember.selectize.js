@@ -282,8 +282,16 @@ Ember.Selectize = Ember.View.extend({
    * Here we process the removed elements
    */
   contentArrayWillChange : function(array, idx, removedCount, addedCount) {
-    for (var i = idx; i < idx + removedCount; i++) {
-      this.objectWasRemoved(array.objectAt(i));
+    var obj, objArray = [];
+    if (this.selectize && array && array.length) {
+      for (var i = idx; i < idx + removedCount; i++) {
+        obj = array.objectAt(i);
+        if (typeOf(obj) === 'object' || typeOf(obj) === 'instance') {
+          Ember.removeObserver(obj, get(this, '_labelPath'), this, '_labelDidChange');
+        }
+      }
+      this.selectize.removeOption(array);
+      this.selectize.refreshOptions(this.selectize.isFocused && !this.selectize.isInputHidden);
     }
     this._selectionDidChange();
   },
@@ -305,26 +313,15 @@ Ember.Selectize = Ember.View.extend({
             label: get(obj, get(this, '_labelPath')),
             data: obj
           });
+          Ember.addObserver(obj,get(this,'_labelPath'),this,'_labelDidChange');
         } else {
           objArray.push({value: obj, label: obj, data: obj});
         }
       }
       this.selectize.addOption(objArray);
       this.selectize.refreshOptions(this.selectize.isFocused && !this.selectize.isInputHidden);
+      this._selectionDidChange();
     }
-  },
-  /*
-   * Function that is responsible for Selectize's option removing logic
-   */
-  objectWasRemoved : function(obj) {
-    if(typeOf(obj) === 'object' || typeOf(obj) === 'instance')
-          Ember.removeObserver(obj,get(this,'_labelPath'),this,'_labelDidChange');
-    if(this.selectize){
-      this.selectize.removeOption(get(obj, get(this,'_valuePath')));
-      this.selectize.refreshOptions(this.selectize.isFocused && !this.selectize.isInputHidden);
-    }
-    //Trigger a selection change, because the previously selected item might not be available anymore.
-    //this._selectionDidChange();
   },
   /*
    * Ember Observer that triggers when an option's label changes.
