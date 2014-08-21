@@ -769,9 +769,9 @@ test("valueBinding handles 0 as initiated value (issue #2763)", function() {
   });
 
   Ember.run(function() {
-    select.destroy(); // Destroy the existing select
+    selectizeView.destroy(); // Destroy the existing select
 
-    select = Ember.Select.extend({
+    selectizeView = Ember.Select.extend({
       content: Ember.A([1,0]),
       indirectData: indirectData,
       valueBinding: 'indirectData.value'
@@ -780,63 +780,25 @@ test("valueBinding handles 0 as initiated value (issue #2763)", function() {
     append();
   });
 
-  equal(select.get('value'), 0, "Value property should equal 0");
+  equal(selectizeView.get('value'), 0, "Value property should equal 0");
 });
 
 test("should be able to select an option and then reselect the prompt", function() {
   Ember.run(function() {
-    select.set('content', Ember.A(['one', 'two', 'three']));
-    select.set('prompt', 'Select something');
+    selectizeView.set('content', Ember.A(['one', 'two', 'three']));
+    selectizeView.set('prompt', 'Select something');
   });
 
   append();
 
-  select.$()[0].selectedIndex = 2;
-  select.$().trigger('change');
-  equal(select.get('selection'), 'two');
+  selectizeView.$()[0].selectedIndex = 2;
+  selectizeView.$().trigger('change');
+  equal(selectizeView.get('selection'), 'two');
 
-  select.$()[0].selectedIndex = 0;
-  select.$().trigger('change');
-  equal(select.get('selection'), null);
-  equal(select.$()[0].selectedIndex, 0);
-});
-
-test("should be able to get the current selection's value", function() {
-  Ember.run(function() {
-    select.set('content', Ember.A([
-      {label: 'Yehuda Katz', value: 'wycats'},
-      {label: 'Tom Dale', value: 'tomdale'},
-      {label: 'Peter Wagenet', value: 'wagenet'},
-      {label: 'Erik Bryn', value: 'ebryn'}
-    ]));
-    select.set('optionLabelPath', 'content.label');
-    select.set('optionValuePath', 'content.value');
-  });
-
-  append();
-
-  equal(select.get('value'), 'wycats');
-});
-
-test("should be able to set the current selection by value", function() {
-  var ebryn = {label: 'Erik Bryn', value: 'ebryn'};
-
-  Ember.run(function() {
-    select.set('content', Ember.A([
-      {label: 'Yehuda Katz', value: 'wycats'},
-      {label: 'Tom Dale', value: 'tomdale'},
-      {label: 'Peter Wagenet', value: 'wagenet'},
-      ebryn
-    ]));
-    select.set('optionLabelPath', 'content.label');
-    select.set('optionValuePath', 'content.value');
-    select.set('value', 'ebryn');
-  });
-
-  append();
-
-  equal(select.get('value'), 'ebryn');
-  equal(select.get('selection'), ebryn);
+  selectizeView.$()[0].selectedIndex = 0;
+  selectizeView.$().trigger('change');
+  equal(selectizeView.get('selection'), null);
+  equal(selectizeView.$()[0].selectedIndex, 0);
 });
 
 module("Ember.Selectize - usage inside templates", {
