@@ -50,19 +50,16 @@ Ember.Selectize = Ember.View.extend({
   create:false,
   createAction:'create',
 
-  didInsertElement : function() {
+  selectizeOptions: Ember.computed(function() {
     var allowCreate = get(this, 'create');
     var createAction = get(this, 'createAction');
-    //View is now in DOM
-    this.inDOM = true;
 
     //Normalize create property if createAction was set
     if(createAction && (createAction !== 'create'))
       allowCreate = true;
 
-    //Create Selectize's instance
     //We proxy callbacks through jQuery's 'proxy' to have the callbacks context set to 'this'
-    this.$().selectize({
+    return {
       plugins: this.plugins,
       labelField : 'label',
       valueField : 'value',
@@ -71,7 +68,15 @@ Ember.Selectize = Ember.View.extend({
       onItemAdd : Ember.$.proxy(this._onItemAdd, this),
       onItemRemove : Ember.$.proxy(this._onItemRemove, this),
       onType : Ember.$.proxy(this._onType, this)
-    });
+    };
+  }),
+
+  didInsertElement : function() {
+    //View is now in DOM
+    this.inDOM = true;
+
+    //Create Selectize's instance
+    this.$().selectize(get(this, 'selectizeOptions'));
 
     //Save the created selectize instance
     this.selectize = this.$()[0].selectize;
