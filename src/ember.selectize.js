@@ -50,6 +50,13 @@ Ember.Selectize = Ember.View.extend({
   create:false,
   createAction:'create',
 
+  /**
+   * Loading feature default values. 
+   * If you want to override the css class that is applied, change the `loadingClass` property.
+   */
+  loading:false,
+  loadingClass:'loading',
+
   selectizeOptions: Ember.computed(function() {
     var allowCreate = get(this, 'create');
     var createAction = get(this, 'createAction');
@@ -86,6 +93,7 @@ Ember.Selectize = Ember.View.extend({
     this._disabledDidChange();
     this._contentDidChange();
     this._selectionDidChange();
+    this._loadingDidChange();
   },
   willDestroyElement : function() {
 
@@ -372,5 +380,18 @@ Ember.Selectize = Ember.View.extend({
     var disable = get(this,'disabled');
     if(disable) this.selectize.disable();
     else this.selectize.enable();
-  },'disabled')
+  },'disabled'),
+  /*
+   * Observer on the loading property.
+   * Here we add/remove a css class, similarly to how selectize does.
+   */
+  _loadingDidChange:Ember.observer(function(){
+    var loading = get(this,'loading'),
+      loadingClass = get(this,'loadingClass');
+    if(loading){
+      this.selectize.$wrapper.addClass(loadingClass);
+    } else {
+      this.selectize.$wrapper.removeClass(loadingClass);
+    }
+  },'loading')
 });
