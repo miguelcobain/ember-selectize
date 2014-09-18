@@ -218,6 +218,7 @@ Ember.Selectize = Ember.View.extend({
         set(this,'selection',null);
         if(this.selectize){
           this.selectize.clear();
+          this.selectize.showInput();
         }
       }
     }
