@@ -57,6 +57,50 @@ Ember.Selectize = Ember.View.extend({
   loading:false,
   loadingClass:'loading',
 
+  /**
+   * The render function names selectize expects.
+   * We will use these to automatically infer the properties with the template and view names.
+   */
+  functionNames:['option','item','option_create','optgroup_header','optgroup'],
+  templateSuffix : 'Template',
+  viewSuffix : 'View',
+  renderOptions: Ember.computed(function(){
+    var functionNames = get(this,'functionNames'),
+      templateSuffix = get(this,'templateSuffix'),
+      viewSuffix = get(this,'viewSuffix'),
+      //this hash will contain the render functions
+      renderFunctions = {};
+
+    functionNames.forEach(function(item){
+      // infer the view name by camelizing selectize's function and appending a view suffix (overridable)
+      var viewPropertyName = camelize(item)+viewSuffix;
+      var viewToRender = get(this,viewPropertyName);
+
+      if(viewToRender){
+        // we have a view to render. set the function.
+        var self = this;
+        renderFunctions[item] = function(data){
+          return self._viewToString(viewToRender,data.data);
+        };
+      } else {
+        // there isn't a view to render. try to get a template.
+        // infer the template name by camelizing selectize's function and appending a template suffix (overridable)
+        var templatePropertyName = camelize(item)+templateSuffix;
+        var templateToRender = get(this,templatePropertyName);
+
+        if(templateToRender){
+          // we have a template to render. set the function.
+          var self = this;
+          renderFunctions[item] = function(data){
+            return self._templateToString(templateToRender,data.data);
+          };
+        }
+      }
+    },this);
+
+    return renderFunctions;
+  }),
+
   selectizeOptions: Ember.computed(function() {
     var allowCreate = get(this, 'create');
     var createAction = get(this, 'createAction');
@@ -74,7 +118,8 @@ Ember.Selectize = Ember.View.extend({
       create: allowCreate ? Ember.$.proxy(this._create, this) : false,
       onItemAdd : Ember.$.proxy(this._onItemAdd, this),
       onItemRemove : Ember.$.proxy(this._onItemRemove, this),
-      onType : Ember.$.proxy(this._onType, this)
+      onType : Ember.$.proxy(this._onType, this),
+      render: get(this, 'renderOptions')
     };
   }),
 
@@ -394,5 +439,39 @@ Ember.Selectize = Ember.View.extend({
     } else {
       this.selectize.$wrapper.removeClass(loadingClass);
     }
-  },'loading')
+  },'loading'),
+  /*
+   * Observer on the loading property.
+   * Here we add/remove a css class, similarly to how selectize does.
+   */
+  _loadingDidChange:Ember.observer(function(){
+    var loading = get(this,'loading'),
+      loadingClass = get(this,'loadingClass');
+    if(loading){
+      this.selectize.$wrapper.addClass(loadingClass);
+    } else {
+      this.selectize.$wrapper.removeClass(loadingClass);
+    }
+  },'loading'),
+
+  _templateToString:function(template,data) {
+    //create a view with a template
+    var view = this.createChildView(Ember.View, {
+      templateName: template,
+      context:data
+    });
+    return this._getStringFromView(view);
+  },
+  _viewToString:function(viewName,data) {
+    //create a view with the given name
+    var view = this.createChildView(viewName, {
+      context:data
+    });
+    return this._getStringFromView(view);
+  },
+  _getStringFromView:function(view){
+    var buffer = new Ember.RenderBuffer();
+    view.renderToBuffer(buffer)
+    return buffer.string();
+  }
 });
