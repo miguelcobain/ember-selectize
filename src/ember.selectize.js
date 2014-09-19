@@ -1,4 +1,4 @@
-var get = Ember.get, set = Ember.set, isArray = Ember.isArray, typeOf = Ember.typeOf, getWithDefault = Ember.getWithDefault;
+var get = Ember.get, set = Ember.set, isArray = Ember.isArray, typeOf = Ember.typeOf, getWithDefault = Ember.getWithDefault, camelize = Ember.String.camelize;
 
 /**
  * Ember.Selectize is an Ember View that encapsulates a Selectize component.
@@ -469,6 +469,11 @@ Ember.Selectize = Ember.View.extend({
     });
     return this._getStringFromView(view);
   },
+  /*
+   * Encapsulates the logic of converting a view to a string
+   */
+  //FIX ME: this method does not work in Ember 1.8.0
+  //see http://git.io/VUYZ4g for more info
   _getStringFromView:function(view){
     var buffer = new Ember.RenderBuffer();
     view.renderToBuffer(buffer)
