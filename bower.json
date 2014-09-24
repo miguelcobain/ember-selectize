@@ -1,6 +1,6 @@
 {
   "name": "ember-selectize",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "http://miguelcobain.github.io/ember-selectize/",
   "authors": [
     "miguelcobain <jmandrade0@gmail.com>"
@@ -30,12 +30,12 @@
     "lib"
   ],
   "dependencies": {
-    "ember": "~1.5.1",
-    "selectize": "~0.9.0"
+    "ember": "^1.7.0",
+    "selectize": "^0.11.1"
   },
   "devDependencies": {
     "qunit": "~1.14.0",
-    "selectize": "~0.10.1",
+    "selectize": "~0.11.1",
     "jquery": "1.11.1"
   }
 }
