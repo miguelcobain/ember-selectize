@@ -5,7 +5,7 @@ var get = Ember.get, set = Ember.set, isArray = Ember.isArray, typeOf = Ember.ty
  * The goal is to use this as a near dropin replacement for Ember.Select.
  */
 Ember.Selectize = Ember.View.extend({
-  attributeBindings : ['multiple', 'placeholder','autocomplete'],
+  attributeBindings : ['multiple','autocomplete'],
   classNames : ['ember-selectize'],
 
   autocomplete:'off',
@@ -51,7 +51,7 @@ Ember.Selectize = Ember.View.extend({
   createAction:'create',
 
   /**
-   * Loading feature default values. 
+   * Loading feature default values.
    * If you want to override the css class that is applied, change the `loadingClass` property.
    */
   loading:false,
@@ -119,7 +119,8 @@ Ember.Selectize = Ember.View.extend({
       onItemAdd : Ember.$.proxy(this._onItemAdd, this),
       onItemRemove : Ember.$.proxy(this._onItemRemove, this),
       onType : Ember.$.proxy(this._onType, this),
-      render: get(this, 'renderOptions')
+      render: get(this, 'renderOptions'),
+      placeholder: get(this,'placeholder')
     };
   }),
 
@@ -428,18 +429,14 @@ Ember.Selectize = Ember.View.extend({
     else this.selectize.enable();
   },'disabled'),
   /*
-   * Observer on the loading property.
-   * Here we add/remove a css class, similarly to how selectize does.
-   */
-  _loadingDidChange:Ember.observer(function(){
-    var loading = get(this,'loading'),
-      loadingClass = get(this,'loadingClass');
-    if(loading){
-      this.selectize.$wrapper.addClass(loadingClass);
-    } else {
-      this.selectize.$wrapper.removeClass(loadingClass);
-    }
-  },'loading'),
+  * Observer on the placeholder property that updates selectize's placeholder.
+  */
+  _placeholderDidChange: Ember.observer(function(){
+    if(!this.selectize) return;
+    var placeholder = get(this,'placeholder');
+    this.selectize.settings.placeholder = placeholder;
+    this.selectize.updatePlaceholder();
+  },'placeholder'),
   /*
    * Observer on the loading property.
    * Here we add/remove a css class, similarly to how selectize does.
