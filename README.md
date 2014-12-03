@@ -1,3 +1,8 @@
+# IMPORTANT
+
+Please use the new https://github.com/miguelcobain/ember-cli-selectize repository.
+This provides an Ember-cli addon and a standalone release. This repository will be **unmaintained**.
+
 # ember-selectize
 
 An Ember and Selectize integration. Check [Selectize](http://brianreavis.github.io/selectize.js/)!
@@ -37,7 +42,7 @@ Tests are written in qunit, and were borrowed from `Ember.Select`.
 I've rewritten many of them, but most of them still fail.
 
 This is due to the nature of this component. `Selectize`'s tests assures that everything is ok between Selectize<->DOM.
-`Ember.Select`'s tests also test the DOM. This is unecessary in this project. 
+`Ember.Select`'s tests also test the DOM. This is unecessary in this project.
 
 Ember-selectize tests should be focused between Ember<->Selectize.
 
