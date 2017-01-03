@@ -153,18 +153,25 @@ Ember.Selectize = Ember.View.extend({
     //We are no longer in DOM
     this.inDOM = false;
   },
+
   /**
    * Event callback that is triggered when user creates a tag
+   * It's the user's responsibility to call the done callback for the selection to update.
    */
-  _create:function(input,callback){
-    // Delete user entered text
-    this.selectize.setTextboxValue('');
-    // Send action to controller
-    get(this,'controller').send(get(this,'createAction'),input);
-    // We cancel the creation here, so it's up to you to include the created element
-    // in the content and selection property
-    callback(null);
-  },
+  _create: function (input, callback) {
+     // Delete user entered text
+     var self = this;
+     var content = this.get('content');
+
+     this.selectize.setTextboxValue('');
+     this.contentArrayWillChange(content, content.length, 0, 1);
+     // Send action to controller
+     get(this,'controller').send(get(this,'createAction'), input, function () {
+       self.contentArrayDidChange(content, content.length - 1, 0, 1);
+       callback();
+     });
+   },
+
   /**
    * Event callback that is triggered when user types in the input element
    */
